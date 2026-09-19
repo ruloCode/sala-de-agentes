@@ -1,0 +1,25 @@
+# Agente de la sala. La web NO está aquí: va a Vercel (ver docs/deploy.md).
+services:
+  agente:
+    build:
+      context: .
+      dockerfile: apps/agent/Dockerfile
+    restart: unless-stopped
+    ports:
+      # Solo loopback: delante va un reverse proxy con TLS. Exponer 8650 a
+      # internet sin https sería servir la voz por un canal que el browser
+      # rechaza de todos modos.
+      - "127.0.0.1:8650:8650"
+    environment:
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:?falta ELEVENLABS_API_KEY}
+      SALA_API_KEY: ${SALA_API_KEY:?falta SALA_API_KEY}
+      MACHINE_NAME: ${MACHINE_NAME:-prod}
+      SALA_METRO_TZ: ${SALA_METRO_TZ:-America/Bogota}
+      SALA_ALLOWED_ORIGINS: ${SALA_ALLOWED_ORIGINS:-}
+      # Direcciones ("calle 10 con la 43") con Google Maps; vacía = el tótem dice que no resuelve direcciones.
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      SALA_ENABLED: ${SALA_ENABLED:-}
+      ESTACION_ENABLED: ${ESTACION_ENABLED:-}
+    volumes:
+      # Lo que hoy vive en ~/.sala. Solo lectura: el agente nunca escribe aquí.
+      - ${SALA_DATA_DIR:-./.sala-data}:/data:ro

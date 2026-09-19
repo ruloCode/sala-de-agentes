@@ -8,3 +8,4 @@ out/
 .DS_Store
 # Modelos de MediaPipe: los baja `scripts/setup-mediapipe.mjs` en predev/prebuild.
 apps/web/public/mediapipe/
+.vercel

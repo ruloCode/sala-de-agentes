@@ -1,0 +1,31 @@
+# OJO: si este archivo existe, Vercel IGNORA .gitignore por completo. Todo lo
+# que no deba subir al deployment va listado AQUÍ, empezando por el .env: un
+# secreto en el bundle de build es un secreto filtrado, y next.config lo
+# cargaría además horneando la URL local del agente en el JS del cliente.
+.env
+.env.*
+!.env.example
+
+node_modules
+**/node_modules
+.next
+.next-dev
+**/.next
+**/.next-dev
+out
+.vercel
+.git
+*.log
+.DS_Store
+apps/web/tsconfig.tsbuildinfo
+
+# Los modelos de MediaPipe los baja el prebuild en Vercel; subirlos son 13 MB
+# por deploy para nada.
+apps/web/public/mediapipe
+
+# Peso muerto para la web.
+docs/img
+docker-compose.yml
+
+# apps/agent NO se excluye: sin su package.json el lockfile del workspace no
+# valida contra --frozen-lockfile.

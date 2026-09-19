@@ -4,10 +4,22 @@
  * client tools de la voz corren ahí), que es lo que permite que la pantalla
  * use datos locales sin exponer nada al proveedor de voz.
  *
- * La URL del agente puede apuntarse a otra máquina de la red (una pantalla
- * vertical no siempre es la que corre el agente): override en localStorage.
+ * DOS MODOS, y la diferencia es de dónde sale la credencial:
+ *
+ *  - PROXY (default, y el único sano en internet): se llama al propio origen,
+ *    `/api/agent/*`, y el route handler reenvía con la clave del servidor. La
+ *    clave no viaja en el bundle, no hay CORS que negociar y no hay mixed
+ *    content porque todo es el mismo https.
+ *  - DIRECTO: con `NEXT_PUBLIC_SALA_AGENT_URL` la pantalla vuelve a llamar al
+ *    agente de frente. Es para la LAN — una pantalla vertical no siempre es la
+ *    máquina que corre el agente — y ahí la clave compartida sí va al browser
+ *    a sabiendas, porque la red es privada.
+ *
+ * La URL también se puede apuntar a mano desde localStorage (QA en la red).
  */
-const DEFAULT_URL = (process.env.NEXT_PUBLIC_SALA_AGENT_URL || "http://localhost:8650").replace(/\/$/, "");
+const PROXY_BASE = "/api/agent";
+const DIRECT_URL = (process.env.NEXT_PUBLIC_SALA_AGENT_URL || "").replace(/\/$/, "");
+const DEFAULT_URL = DIRECT_URL || PROXY_BASE;
 const URL_KEY = "sala_agent_url";
 
 export function getAgentUrl(): string {
@@ -30,8 +42,17 @@ export function setAgentUrl(url: string | null): void {
   }
 }
 
-/** Clave compartida cuando el agente escucha en la red. Vacía = local. */
+/** True cuando las llamadas van por el propio origen y la clave la pone el servidor. */
+function viaProxy(): boolean {
+  return getAgentUrl() === PROXY_BASE;
+}
+
+/**
+ * Clave compartida para el modo DIRECTO. Por el proxy devuelve vacío: mandarla
+ * desde el browser sería volver a publicarla, que es justo lo que se evita.
+ */
 export function getAgentKey(): string {
+  if (viaProxy()) return "";
   return process.env.NEXT_PUBLIC_SALA_API_KEY || "";
 }
 

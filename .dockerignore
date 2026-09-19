@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+.next
+.next-dev
+**/.next
+**/.next-dev
+out
+.git
+.env
+.env.local
+*.log
+.DS_Store
+apps/web/public/mediapipe
+docs/img
