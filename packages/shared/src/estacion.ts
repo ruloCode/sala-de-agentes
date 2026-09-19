@@ -160,7 +160,7 @@ export function noticesForLines(notices: MetroNotice[], lineShorts: string[]): M
   return notices.filter((n) => !n.line || set.has(n.line.toUpperCase()));
 }
 
-/** Texto hablado de una novedad: lo que Hermes dice antes de la ruta. */
+/** Texto hablado de una novedad: lo que el anfitrión dice antes de la ruta. */
 export function describeNotice(n: MetroNotice): string {
   const line = n.line ? `Línea ${n.line}: ` : "";
   const delay = n.delayMin ? ` (unos ${n.delayMin} minutos de demora)` : "";

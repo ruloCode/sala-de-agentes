@@ -13,7 +13,7 @@ config({ path: resolve(fileURLToPath(import.meta.url), "../../../../.env") });
 export const env = {
   PORT: Number(process.env.PORT || process.env.SALA_PORT || 8650),
   /** Vacío = el agente solo acepta localhost. Con clave, escucha en la LAN. */
-  API_KEY: process.env.SALA_API_KEY || process.env.HERMES_API_KEY || "",
+  API_KEY: process.env.SALA_API_KEY || "",
   /** "off" apaga /sala/* y el token por clave. */
   SALA_ENABLED: (process.env.SALA_ENABLED || "").toLowerCase() !== "off",
   /** "off" apaga /metro/* (el tótem de estación). */
@@ -21,7 +21,10 @@ export const env = {
   /** Nombre de esta máquina: lo usa /machines para armar la URL del QR. */
   MACHINE_NAME: process.env.MACHINE_NAME || "local",
   ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY || "",
-  /** Agentes reusables por clave (`?agent=hermes` / `?agent=tutor`). */
+  /**
+   * Agentes de ElevenLabs que ya existen fuera de este repo: un personaje
+   * puede reusarlos con `voice.reuse` en vez de tener el suyo.
+   */
   ELEVENLABS_AGENT_ID: process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || "",
   ELEVENLABS_TUTOR_AGENT_ID: process.env.NEXT_PUBLIC_ELEVENLABS_TUTOR_AGENT_ID || "",
 } as const;

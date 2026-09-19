@@ -13,4 +13,4 @@ function systemUserName(): string {
   }
 }
 
-export const OWNER: string = process.env.SALA_OWNER_NAME?.trim() || process.env.HERMES_OWNER_NAME?.trim() || systemUserName() || "Usuario";
+export const OWNER: string = process.env.SALA_OWNER_NAME?.trim() || systemUserName() || "Usuario";

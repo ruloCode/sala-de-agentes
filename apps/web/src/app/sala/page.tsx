@@ -71,7 +71,7 @@ interface Line {
   text: string;
 }
 
-/** Token por clave: hermes/tutor reusados, `cast` (elenco) o `agent:<clave>`; misma ruta Next que el shell. */
+/** Credenciales de voz por clave: `cast` (el elenco) o la clave del personaje. */
 async function fetchTokenFor(which: string) {
   const res = await hermesFetch(`/sala/token?agent=${encodeURIComponent(which)}`);
   return (await res.json()) as { conversationToken?: string; signedUrl?: string; error?: string };
@@ -91,7 +91,7 @@ export default function SalaPage() {
     hermesFetch("/sala/agents")
       .then(async (res) => {
         if (!alive) return;
-        // 404 = HERMES_SALA=off en el agente · 500 = sala.json no valida · 200 = lista.
+        // 404 = SALA_ENABLED=off en el agente · 500 = sala.json no valida · 200 = lista.
         if (res.status === 404) return setLoad({ kind: "off" });
         const r = (await res.json()) as {
           agents?: SalaAgentPublic[];
@@ -616,7 +616,7 @@ export default function SalaPage() {
               {load.kind === "offline"
                 ? load.error
                 : load.kind === "off"
-                  ? "El agente corre con HERMES_SALA=off. Quita esa variable del .env y reinícialo."
+                  ? "El agente corre con SALA_ENABLED=off. Quita esa variable del .env y reinícialo."
                   : load.kind === "invalid"
                     ? load.error
                     : `Crea ${load.path} con tus agentes (plantilla en docs/sala.example.json) y recarga.`}

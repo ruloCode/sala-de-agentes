@@ -161,8 +161,8 @@ export function salaClientTools(): Record<string, (p: Record<string, unknown>) =
         return `No pude consultar el id ${id}.`;
       }
     },
-    // Tools de interfaz que el agente Hermes tiene declaradas: en la sala no
-    // hay dashboard que mover; se responde algo útil en vez de fallar.
+    // Tools de interfaz heredadas de un dashboard: aquí no hay nada que
+    // mover, así que se responde algo útil en vez de fallar.
     focus_project: () => "En la sala no hay tablero que enfocar; sigue hablando.",
     show_panel: () => "En la sala no hay paneles; te lo cuento hablado.",
     show_project_status: async (p) => {
@@ -186,6 +186,6 @@ export function salaClientTools(): Record<string, (p: Record<string, unknown>) =
     save_vocab: () => "Noted. In the room we don't save vocabulary; keep talking.",
     recall_vocab: () => "No saved vocabulary in the room session.",
     end_practice_session: () => "This room chat isn't a tracked practice session.",
-    start_english_practice: () => "Teacher ya está en la sala: levanta la mano hacia él.",
+    start_english_practice: () => "Ese modo no existe en esta sala.",
   };
 }

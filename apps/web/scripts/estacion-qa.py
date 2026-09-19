@@ -12,10 +12,10 @@ comprueba lo que tiene que ser verdad en el andén:
 
 Uso (el venv de Playwright del repo, ver docs/estacion-metro.md):
 
-    ~/.cache/hermes-pw-venv/bin/python apps/web/scripts/estacion-qa.py
-    ~/.cache/hermes-pw-venv/bin/python apps/web/scripts/estacion-qa.py --runs 3
+    python apps/web/scripts/estacion-qa.py
+    python apps/web/scripts/estacion-qa.py --runs 3
 
-Requiere el agente en :8650 y la web en :31999. Consume cuota de voz: son
+Requiere el agente y la web corriendo (pnpm dev). Consume cuota de voz: son
 tres turnos por corrida.
 """
 

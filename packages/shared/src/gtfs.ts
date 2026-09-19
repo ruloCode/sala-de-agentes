@@ -899,7 +899,7 @@ export function planRoute(net: MetroNetwork, fromKey: string, toKey: string, opt
   };
 }
 
-/** Texto hablado del plan, en español: lo que Hermes dice tal cual. */
+/** Texto hablado del plan, en español: lo que el anfitrión dice tal cual. */
 export function describePlan(plan: RoutePlan): string {
   const parts = plan.legs.map((l, i) => {
     const dest = l.headsign ? ` sentido ${l.headsign}` : "";

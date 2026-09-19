@@ -145,7 +145,7 @@ export class SalaCalls {
       }).format(new Date());
       const dynamicVariables: Record<string, string> = {
         today,
-        // Hermes y los agentes propios leen {{session_scope}}; el tutor lee
+        // Los personajes con voz propia leen {{session_scope}}; un agente reusado lee
         // {{practice_context}} — se mandan ambas, la que no exista se ignora.
         session_scope: framing,
         practice_context: framing,

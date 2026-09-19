@@ -8,8 +8,8 @@
  * primer paint para que no haya destello.
  *
  * Canvas/three leen los tokens con readToken() (caché por sesión): al
- * cambiar de tema se limpia la caché y se emite `hermes:theme` para que los
- * que dibujan una sola vez se re-monten (ver MemoryView).
+ * cambiar de tema se limpia la caché y se emite `sala:theme` para que los
+ * que dibujan una sola vez se re-monten.
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { resetTokenCache } from "@/components/ui/tones";
@@ -71,7 +71,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.setAttribute("data-theme-transition", "");
     root.setAttribute("data-theme", resolved);
     resetTokenCache();
-    window.dispatchEvent(new CustomEvent("hermes:theme", { detail: resolved }));
+    window.dispatchEvent(new CustomEvent("sala:theme", { detail: resolved }));
     const t = setTimeout(() => root.removeAttribute("data-theme-transition"), 300);
     return () => clearTimeout(t);
   }, [resolved, ready]);
