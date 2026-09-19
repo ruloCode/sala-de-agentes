@@ -1,0 +1,16 @@
+{
+  "name": "sala-de-agentes",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "packageManager": "pnpm@10.20.0",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm --filter @sala/web build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r --if-present test",
+    "setup:voz": "pnpm --filter @sala/agent setup:voz",
+    "ruta": "pnpm --filter @sala/agent ruta",
+    "setup:config": "pnpm --filter @sala/agent setup:config"
+  }
+}

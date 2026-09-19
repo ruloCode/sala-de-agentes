@@ -1,0 +1,68 @@
+{
+  "topic": "Lo bonito que es Medellín",
+  "agents": [
+    {
+      "key": "hermes",
+      "name": "Hermes",
+      "project": "hermes-os",
+      "color": "#f2ede4",
+      "head": "sphere",
+      "height": 1.95,
+      "build": "medium",
+      "portrait_prompt": "Portrait bust of a calm AI orchestrator character, warm off-white ceramic sphere head, soft studio light, dark background, minimal, no text",
+      "voice": {
+        "reuse": "hermes"
+      }
+    },
+    {
+      "key": "ventas",
+      "name": "Ventas",
+      "project": "mi-proyecto",
+      "color": "#5b7fa6",
+      "head": "cube",
+      "height": 1.8,
+      "build": "wide",
+      "voice": {
+        "agent_id": null,
+        "voice_id": "1aJyZpkt0vxhGPBnPyrs",
+        "voice_name": "Fernanda Sanmiguel - Neutral and Serious",
+        "language": "es",
+        "first_message": "Hola, soy Ventas. ¿Qué quieres saber del proyecto?",
+        "prompt": "Eres el agente comercial del proyecto. Tono directo. Aquí van los hechos que debe saber de memoria (precios, fechas, prioridades del mes).",
+        "tools": [
+          "get_project_status",
+          "run_task",
+          "check_task",
+          "search_memory",
+          "show_project_status"
+        ]
+      }
+    },
+    {
+      "key": "teacher",
+      "name": "Teacher",
+      "project": "ingles",
+      "color": "#e7b04e",
+      "head": "torus",
+      "height": 1.65,
+      "build": "medium",
+      "voice": {
+        "reuse": "tutor"
+      }
+    }
+  ],
+  "cast": {
+    "agent_id": null,
+    "members": [
+      "ventas"
+    ],
+    "default": "ventas"
+  },
+  "station": {
+    "_comment": "Opcional. Presente = el elenco es el anfitrión de un TÓTEM DE ESTACIÓN: el origen por defecto de las rutas es esta estación y el prompt suma las reglas de dato (llamar metro_route antes de decir una ruta, nunca inventar horarios). id se resuelve contra el GTFS (ver docs/estacion-metro.md).",
+    "id": "clave-de-estacion-del-gtfs",
+    "name": "Nombre de la estación",
+    "line": "A",
+    "default_language": "es"
+  }
+}

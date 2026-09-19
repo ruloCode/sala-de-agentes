@@ -1,0 +1,32 @@
+{
+  "name": "@sala/web",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "predev": "node scripts/setup-mediapipe.mjs",
+    "dev": "next dev -p ${SALA_WEB_PORT:-31999}",
+    "prebuild": "node scripts/setup-mediapipe.mjs",
+    "build": "next build",
+    "start": "next start -p ${SALA_WEB_PORT:-31999}",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@elevenlabs/client": "1.23.0",
+    "@mediapipe/tasks-vision": "^0.10.35",
+    "@sala/shared": "workspace:*",
+    "next": "^15.5.24",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.20.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@types/three": "^0.185.4",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  }
+}
