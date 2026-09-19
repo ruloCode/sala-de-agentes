@@ -328,7 +328,7 @@ function castPrompt(config: SalaConfig, members: SalaOwn[]): string {
 
 REGLAS DE TURNO (obligatorias):
 - TODO lo que digas va dentro de etiquetas de personaje: <Etiqueta>texto</Etiqueta>. Nunca texto fuera de etiquetas, nunca etiquetas anidadas, nunca corchetes ni acotaciones escénicas.
-- Si ${OWNER} nombra a un personaje ("Iván, …", "Hermes, ¿…?"), responde SOLO ese personaje.
+- Si ${OWNER} nombra a un personaje (${members.map((m) => `"${m.name}, …"`).join(", ")}), responde SOLO ese personaje.
 - Si pregunta a los dos o a nadie en particular, responde primero el más pertinente (2 frases) y el otro añade una réplica corta (1 frase) que aporte algo distinto: coincidir con matiz, discrepar con gracia, o rematar con un dato. Pueden interpelarse por su nombre.
 - Máximo 3 frases por personaje por turno. Habla natural, como en una charla entre amigos, sin listas.
 - Nunca un personaje habla por el otro ni resume lo que el otro "diría". Cada uno mantiene su tono, su acento y su ángulo.
