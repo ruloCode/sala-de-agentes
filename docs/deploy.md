@@ -104,6 +104,35 @@ client tools de workspace y usa `tts.supported_voices` (multi-voz).
 `pnpm setup:voz` corre desde una máquina de trabajo, no desde el servidor:
 escribe los `agent_id` de vuelta en `sala.json`.
 
+## Interino: el agente desde tu propia máquina
+
+Mientras no haya VM, el agente puede ser el de tu equipo detrás de un túnel.
+Es **provisional**: prod depende de que tu máquina esté encendida, con el
+agente y el túnel corriendo, y la URL del túnel rápido cambia en cada arranque.
+
+```bash
+# 1. La misma clave que tiene Vercel, en el .env de la raíz (el agente la exige
+#    como Bearer y sin ella el túnel dejaría el agente abierto a internet).
+vercel env pull /tmp/prod.env --environment=production   # copia SALA_API_KEY a .env
+pnpm --filter @sala/agent dev                             # reinicia para que la tome
+
+# 2. El túnel (sin cuenta; la URL sale en el log).
+cloudflared tunnel --url http://127.0.0.1:8651 --no-autoupdate
+
+# 3. Vercel apunta al túnel y se redespliega (las variables se leen al desplegar).
+vercel env rm SALA_AGENT_URL production --yes
+printf '%s' "https://<lo-que-dio-el-tunel>.trycloudflare.com" | vercel env add SALA_AGENT_URL production
+vercel --prod --yes
+```
+
+Comprobación: `curl https://<tu-web>/api/agent/health` → 200, y
+`POST /api/agent/metro/route {"to":"barrio Boston"}` devuelve el plan.
+
+**Deployment Protection.** Un tótem y el QR del celular son públicos: el
+proyecto va en *Standard Protection* (previews con login de Vercel, producción
+abierta). Con *All Deployments* el alias de producción también pide login y la
+pantalla no carga para nadie que no sea tú.
+
 ## 4. Después de desplegar
 
 ```bash
