@@ -43,7 +43,7 @@ Requiere Node 22+, pnpm y una cuenta de ElevenLabs.
 
 ```bash
 pnpm install
-cp .env.example .env         # pon tu ELEVENLABS_API_KEY
+cp .env.example .env         # pon tu ELEVENLABS_API_KEY (y GOOGLE_MAPS_API_KEY si quieres direcciones)
 pnpm setup:config            # prepara ~/.sala con las plantillas
 pnpm setup:voz               # crea o parchea los agentes de voz (idempotente)
 pnpm dev                     # agente :8650 + web :31999
@@ -66,6 +66,7 @@ que encuentre.
 | `lugares.json` | Qué hay cerca de cada estación, con minutos a pie, horario y **fuente**. | `docs/lugares.example.json` |
 | `eventos.json` | De dónde sale la **agenda** de la ciudad (qué pasa, con fecha). Sin fuentes, el tótem lo dice. | `docs/eventos.example.json` |
 | `metro-status.json` | Novedades del servicio de hoy. Sin archivo, no hay banner. | `docs/metro-status.example.json` |
+| `barrios.json` | Barrios con su centroide y su **fuente** (el dataset oficial de límites de tu ciudad). Con él, "¿cómo llego al barrio X?" encuentra dónde bajarse y cuánto se camina. Sin él, los barrios no se reconocen y el tótem lo dice. | `docs/barrios.example.json` |
 
 Un lugar sin horario publicado se muestra como "sin horario publicado". El
 campo `hours` solo se escribe cuando `source` dice de dónde salió.
@@ -94,6 +95,39 @@ pnpm ruta "Parque Berrío" "Parque Arví"   # la ruta con tramos y minutos
 pnpm ruta --next "Parque Berrío"          # próximas salidas
 pnpm ruta --stations                      # toda la red
 ```
+
+## Llegar a un lugar, no a una estación
+
+Nadie va "a Bicentenario": va al barrio Boston. `POST /metro/route` acepta como
+origen y destino **lo que dijo el viajero** y lo resuelve en cascada, sin
+adivinar:
+
+1. **Dirección** (número + vía: "calle 10 con la 43") → Google Maps Geocoding,
+   con `GOOGLE_MAPS_API_KEY` en el `.env`. Solo sale de tu máquina el texto de
+   la dirección, desde el agente; el resultado se descarta si cae fuera de la
+   zona que cubre el sistema. Sin key, el tótem dice que no resuelve
+   direcciones.
+2. **Estación** (exacta, alias de `metro.json`, o muy parecida).
+3. **Barrio** de `barrios.json` o **lugar** de `lugares.json`: lo exacto manda
+   sobre lo parcial ("La Candelaria" es el barrio, no la basílica).
+4. Varios parecidos → devuelve candidatas y la voz repregunta.
+
+El plan usa **todos los modos del feed** (metro, tranvía, cable, buses), prueba
+las estaciones cercanas al destino y elige la de menos transbordos y luego
+menos minutos **totales, caminata incluida**. La respuesta trae origen y
+destino reales con su fuente, dónde subirse y bajarse, los tramos a pie con
+minutos (4,5 km/h × factor de calle 1,35, desde las coordenadas del GTFS) y la
+**hora estimada de llegada**, marcada "horario publicado" cuando el feed venció.
+
+```bash
+pnpm ruta "Parque Berrío" "barrio Boston"      # A + tranvía, bajarse y caminar 8 min
+pnpm ruta "Parque Berrío" "Museo de Antioquia" # a pie, sin tomar nada
+pnpm ruta "Parque Berrío" "Cra 43A #7-50"      # dirección (necesita la key)
+```
+
+Una palabra genérica ("barrio", "parque", "calle") nunca identifica una
+estación por sí sola: antes "barrio Boston" resolvía con confianza a *Barrio
+Colombia*, al otro lado del río.
 
 ## Rutas del agente
 

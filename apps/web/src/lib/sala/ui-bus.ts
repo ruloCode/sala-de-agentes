@@ -6,14 +6,41 @@
 // mínimo en memoria (sin dependencias, sin React): las tools son un mapa plano
 // que vive fuera del árbol de componentes.
 
+/** Un tramo a pie: desde/hasta un lugar o una estación, con metros y minutos. */
+export interface UiWalkLeg {
+  from: string;
+  to: string;
+  meters: number;
+  minutes: number;
+}
+
+/** De dónde sale y a dónde llega DE VERDAD el viajero (barrio, dirección, lugar o estación). */
+export interface UiRoutePoint {
+  name: string;
+  kind: "estacion" | "barrio" | "lugar" | "direccion" | string;
+  /** De dónde salió la coordenada; null para estaciones (GTFS). */
+  source: string | null;
+}
+
 export interface UiRoutePlan {
   from: string;
   to: string;
+  /** Total: caminatas + viaje + transbordos. */
   minutes: number;
   rideMinutes: number;
   transferMinutes: number;
   transfers: number;
   transferEstimated: boolean;
+  origin?: UiRoutePoint;
+  destination?: UiRoutePoint;
+  /** Estación donde se sube y donde se baja. */
+  boardAt?: string;
+  alightAt?: string;
+  walkStart?: UiWalkLeg | null;
+  walkEnd?: UiWalkLeg | null;
+  walkMinutes?: number;
+  /** Hora estimada de llegada (HH:MM local); `stale` = calculada sobre horario publicado. */
+  arrival?: { at: string; waitMinutes: number | null; stale: boolean } | null;
   legs: {
     line: string;
     lineName: string;

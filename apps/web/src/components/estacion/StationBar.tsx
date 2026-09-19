@@ -32,9 +32,16 @@ export function StationBar({ station, line, lineColor, clock, lang, next, schedu
           {station}
         </p>
         {next.length > 0 && (
-          <p className="mt-2 truncate text-[20px] text-[var(--est-butter)]/70">
-            {t(lang, "next")}: {next.slice(0, 2).map((d) => `${d.line} → ${d.headsign} ${d.inMinutes[0]} ${t(lang, "minutes")}`).join(" · ")}
-            {scheduleStale ? ` · ${t(lang, "scheduleNote")}` : ""}
+          <p className="mt-2 flex min-w-0 items-baseline gap-2 text-[20px] text-[var(--est-butter)]/70">
+            {/* Las salidas ceden: si no caben, se recortan. */}
+            <span className="truncate">
+              {t(lang, "next")}: {next.slice(0, 2).map((d) => `${d.line} → ${d.headsign} ${d.inMinutes[0]} ${t(lang, "minutes")}`).join(" · ")}
+            </span>
+            {/* La nota NO cede. Iba dentro del mismo truncate y se cortaba a la
+                mitad ("Horario publicado, no tiemp…"): la pantalla quedaba
+                prometiendo tiempo real. Es la diferencia entre un horario
+                publicado y una predicción, así que se muestra entera. */}
+            {scheduleStale && <span className="shrink-0">· {t(lang, "scheduleNote")}</span>}
           </p>
         )}
       </div>

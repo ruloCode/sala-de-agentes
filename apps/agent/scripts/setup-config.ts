@@ -23,6 +23,7 @@ const ARCHIVOS: { destino: string; plantilla?: string; que: string }[] = [
   { destino: "metro.json", plantilla: "docs/metro.example.json", que: "alias y nombres de estaciones" },
   { destino: "lugares.json", plantilla: "docs/lugares.example.json", que: "qué hay cerca de cada estación" },
   { destino: "metro-status.json", plantilla: "docs/metro-status.example.json", que: "novedades del servicio" },
+  { destino: "barrios.json", plantilla: "docs/barrios.example.json", que: "barrios con su centroide, para llegar a un barrio y no solo a una estación" },
   { destino: "eventos.json", plantilla: "docs/eventos.example.json", que: "de dónde sale la agenda de la ciudad" },
 ];
 

@@ -281,15 +281,30 @@ export default function MovilPage({ params }: { params: Promise<{ token: string 
           <section className="rounded-2xl border border-[var(--est-ink)]/10 bg-white/60 p-4">
             <p className="text-[13px] tracking-wide opacity-60">{L.back}</p>
             <p className="mt-1 font-[family-name:var(--font-baloo)] text-[21px] leading-tight font-semibold">
-              {route.from} → {route.to}
+              {route.origin?.name ?? route.from} → {route.destination?.name ?? route.to}
             </p>
             <p className="mt-0.5 text-[15px] opacity-70">
               {route.minutes} {t(lang, "minutes")} ·{" "}
-              {route.transfers === 0
-                ? t(lang, "noTransfers")
-                : `${route.transfers} ${route.transfers === 1 ? t(lang, "transfer") : t(lang, "transfers")}`}
+              {route.legs.length === 0
+                ? t(lang, "walkOnly")
+                : route.transfers === 0
+                  ? t(lang, "noTransfers")
+                  : `${route.transfers} ${route.transfers === 1 ? t(lang, "transfer") : t(lang, "transfers")}`}
+              {route.arrival ? ` · ${t(lang, "arrive")} ${route.arrival.at}` : ""}
             </p>
             <ol className="mt-3 flex flex-col gap-2">
+              {/* La caminata inicial y la final son tramos como los demás. */}
+              {route.walkStart && (
+                <li className="flex items-center gap-3">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 border-[var(--est-ink)]/35 text-[12px] font-bold">
+                    {route.walkStart.minutes}′
+                  </span>
+                  <span className="min-w-0 text-[15px]">
+                    <span className="font-medium">{route.walkStart.to}</span>
+                    <span className="opacity-65">{` · ${route.walkStart.minutes} ${t(lang, "minutes")} ${t(lang, "walk")}`}</span>
+                  </span>
+                </li>
+              )}
               {route.legs.map((leg, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <span
@@ -307,7 +322,19 @@ export default function MovilPage({ params }: { params: Promise<{ token: string 
                   </span>
                 </li>
               ))}
+              {route.walkEnd && (
+                <li className="flex items-center gap-3">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 border-[var(--est-ink)]/35 text-[12px] font-bold">
+                    {route.walkEnd.minutes}′
+                  </span>
+                  <span className="min-w-0 text-[15px]">
+                    <span className="font-medium">{route.walkEnd.to}</span>
+                    <span className="opacity-65">{` · ${route.walkEnd.minutes} ${t(lang, "minutes")} ${t(lang, "walk")}`}</span>
+                  </span>
+                </li>
+              )}
             </ol>
+            {route.arrival?.stale && <p className="mt-2 text-[12px] opacity-55">{t(lang, "scheduleNote")}</p>}
           </section>
         )}
 

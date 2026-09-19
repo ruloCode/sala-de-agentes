@@ -69,12 +69,12 @@ const ESTACION_TOOLS: ToolDef[] = [
   {
     name: "metro_route",
     description:
-      "Calcula la ruta REAL entre dos estaciones del sistema de transporte (líneas, transbordos, paradas y minutos) y la pinta en la pantalla. Llámala SIEMPRE antes de decir cómo llegar a algún lado: nunca respondas una ruta de memoria. Si el viajero no dice de dónde sale, usa la estación donde está el tótem. Di la respuesta tal como vuelve: línea, transbordos y minutos.",
+      "Calcula la ruta REAL a un LUGAR de la ciudad —una estación, un barrio, un sitio cargado o una dirección— usando todo el sistema de transporte (metro, tranvía, metrocable y buses del feed): dice dónde subirse, los tramos con sus líneas y transbordos, dónde bajarse, cuántos minutos a pie quedan hasta el destino, el total y la hora estimada de llegada, y lo pinta en la pantalla. Llámala SIEMPRE antes de decir cómo llegar a algún lado: nunca respondas una ruta de memoria. Pasa el destino TAL CUAL lo dijo el viajero (\"barrio Boston\", \"calle 10 con la 43\", \"el Museo de Antioquia\"): la tool lo resuelve; no lo cambies tú por una estación. Si el viajero no dice de dónde sale, usa la estación donde está el tótem. Si la respuesta trae candidatas, repregunta con ellas.",
     parameters: {
       type: "object",
       properties: {
-        from: { type: "string", description: "Estación de origen; si no la dicen, la estación del tótem" },
-        to: { type: "string", description: "Estación o lugar de destino, tal como lo dijo el viajero" },
+        from: { type: "string", description: "Origen tal como lo dijo el viajero (estación, barrio o dirección); si no lo dice, la estación del tótem" },
+        to: { type: "string", description: "Destino TAL COMO lo dijo el viajero: estación, barrio, lugar o dirección. No lo traduzcas a una estación" },
       },
       required: ["to"],
     },
@@ -307,7 +307,7 @@ function stationRules(station: NonNullable<SalaConfig["station"]>): string {
 DÓNDE ESTÁS: esta pantalla está en la estación {{station_name}} (línea {{station_line}}) y le habla a quien pasa por el andén. Si el viajero no dice de dónde sale, el origen es {{station_name}}.
 
 REGLAS DE DATO (por encima de cualquier otra):
-- Antes de decir CÓMO LLEGAR a cualquier lado, llama metro_route. Di la ruta tal como vuelve: líneas, transbordos y minutos, sin redondear a tu gusto y sin agregar estaciones que no estén en la respuesta.
+- Antes de decir CÓMO LLEGAR a cualquier lado, llama metro_route con el destino TAL CUAL lo dijo el viajero (un barrio, una dirección, un sitio: la tool sabe resolverlo; tú no lo cambies por una estación). Di la ruta tal como vuelve: dónde subirse, líneas, transbordos, dónde bajarse y cuántos minutos a pie quedan, sin redondear a tu gusto y sin agregar estaciones que no estén en la respuesta. Si vuelve una hora de llegada, dila; si viene marcada como horario publicado, dilo así.
 - Nunca inventes horarios, tarifas ni tiempos. Los horarios de lugares salen de places_near; las horas de los trenes, de metro_next; si la respuesta dice que es horario publicado, dilo así.
 - Nunca inventes eventos, fechas ni sedes. La agenda de la ciudad sale de events_near; si un evento no trae sede publicada, di el barrio y que la dirección la dan al inscribirse, en vez de nombrar un sitio. Si la respuesta viene marcada como lo último leído, dilo antes de contarla.
 - Si hay una novedad del servicio (metro_status) que toca la ruta, dila ANTES de la ruta, en una frase.

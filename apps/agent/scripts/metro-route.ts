@@ -9,7 +9,7 @@
 import { config } from "dotenv";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { describePlan, localClock, nextDepartures, planRoute, resolveStation, networkSummary } from "@sala/shared";
+import { localClock, nextDepartures, resolveStation, networkSummary } from "@sala/shared";
 
 const root = resolve(fileURLToPath(import.meta.url), "../../../..");
 config({ path: resolve(root, ".env") });
@@ -45,23 +45,31 @@ if (args[0] === "--next") {
 
 const [fromText, toText] = args;
 if (!fromText || !toText) {
-  console.error('Uso: metro-route.ts "<origen>" "<destino>"');
+  console.error('Uso: metro-route.ts "<origen>" "<destino>"   (estación, barrio, lugar o dirección)');
   process.exit(1);
 }
-const from = resolveStation(net, fromText);
-const to = resolveStation(net, toText);
-if (!from || !to) {
-  console.error(`No encuentro ${!from ? `"${fromText}"` : `"${toText}"`}`);
+// La MISMA cascada que usa el tótem (estación → lugar → barrio → dirección),
+// para que lo que se ve en la terminal sea lo que oye el viajero.
+const { routeBetween } = await import("../src/metro/store.js");
+const r = await routeBetween(fromText, toText);
+if (!r.ok || !r.plan) {
+  console.error(r.error ?? "sin ruta");
+  if (r.suggestions?.length) console.error(`¿Quizás? ${r.suggestions.join(" · ")}`);
   process.exit(1);
 }
-const plan = planRoute(net, from.station.key, to.station.key);
-if (!plan) {
-  console.error(`Sin ruta entre ${from.station.name} y ${to.station.name}`);
-  process.exit(1);
+const p = r.plan;
+const desc = (x: { name: string; kind: string; source: string | null }) => `${x.name}${x.kind === "estacion" ? "" : ` (${x.kind}${x.source ? `, fuente: ${x.source.slice(0, 60)}${x.source.length > 60 ? "…" : ""}` : ""})`}`;
+console.log(`${desc(p.origin)} → ${desc(p.destination)}`);
+console.log(
+  `${p.minutes} min en total (${p.rideMinutes} en el sistema + ${p.transferMinutes} de transbordo${p.transferEstimated ? ", estimado" : ""} + ${p.walkMinutes} a pie) · ${p.transfers} transbordos` +
+    (p.arrival ? ` · llegas ≈ ${p.arrival.at}${p.arrival.waitMinutes !== null ? ` (espera ${p.arrival.waitMinutes} min)` : ""}${p.arrival.stale ? " · HORARIO PUBLICADO, no tiempo real" : ""}` : "") +
+    "\n",
+);
+if (p.walkStart) console.log(`  ${"a pie".padEnd(18)}          ${p.walkStart.from} → ${p.walkStart.to} · ${p.walkStart.minutes} min (${p.walkStart.meters} m)`);
+for (const leg of p.legs) {
+  console.log(`  ${leg.lineName.padEnd(18)} ${leg.color}  ${leg.from} → ${leg.to}${leg.headsign ? `  (sentido ${leg.headsign})` : ""}`);
+  console.log(`  ${"".padEnd(18)} ${leg.stops} ${leg.stops === 1 ? "parada" : "paradas"} · ${leg.minutes} min · ${leg.stations.join(" · ")}`);
 }
-console.log(`${plan.from.name} → ${plan.to.name} · ${plan.minutes} min (${plan.rideMinutes} en tren + ${plan.transferMinutes} de transbordo${plan.transferEstimated ? ", estimado" : ""}) · ${plan.transfers} transbordos\n`);
-for (const leg of plan.legs) {
-  console.log(`  ${leg.lineName.padEnd(18)} ${leg.color}  ${leg.fromName} → ${leg.toName}${leg.headsign ? `  (sentido ${leg.headsign})` : ""}`);
-  console.log(`  ${"".padEnd(18)} ${leg.stopsCount} ${leg.stopsCount === 1 ? "parada" : "paradas"} · ${leg.minutes} min · ${leg.stations.join(" · ")}`);
-}
-console.log(`\nHablado: ${describePlan(plan)}`);
+if (p.walkEnd) console.log(`  ${"a pie".padEnd(18)}          ${p.walkEnd.from} → ${p.walkEnd.to} · ${p.walkEnd.minutes} min (${p.walkEnd.meters} m)`);
+if (r.notices?.length) console.log(`\nAvisos: ${r.notices.map((n) => `${n.line ? `${n.line}: ` : ""}${n.text}`).join(" · ")}`);
+console.log(`\nHablado: ${r.say}`);

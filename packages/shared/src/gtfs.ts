@@ -671,6 +671,23 @@ export function transferTime(net: MetroNetwork, station: string, a: string, b: s
 
 const QUERY_FILLER = /^(?:la\s+|el\s+)?(?:estacion|parada|metro|estacion del metro|estacion de metro)\s+(?:de\s+|del\s+)?/;
 
+/**
+ * Palabras que describen un TIPO de lugar, no un lugar: compartirlas con el
+ * nombre de una estación no identifica nada. Sin esta lista, "barrio Boston"
+ * resolvía a "Barrio Colombia" con confianza —un destino inventado, que es
+ * peor que no saber. Van normalizadas (sin tilde).
+ */
+export const GENERIC_PLACE_WORDS: ReadonlySet<string> = new Set([
+  "barrio", "barrios", "sector", "zona", "parque", "plaza", "centro", "estacion", "parada", "calle", "carrera",
+  "avenida", "diagonal", "transversal", "circular", "unidad", "edificio", "conjunto", "urbanizacion", "comuna",
+  "corregimiento", "vereda", "municipio", "ciudad", "pueblo", "norte", "sur", "oriente", "occidente",
+]);
+
+/** Un token cuenta para identificar un lugar si es largo y no es genérico. */
+export function meaningfulToken(t: string): boolean {
+  return t.length > 3 && !GENERIC_PLACE_WORDS.has(t);
+}
+
 export interface StationMatch {
   station: MetroStation;
   /** 1 = exacto o alias; menos = aproximado. */
@@ -695,7 +712,13 @@ export function matchStations(net: MetroNetwork, text: string, limit = 5): Stati
   q = q.replace(/^(?:el|la|los|las)\s+/, "");
   const exact2 = net.stations.get(q);
   if (exact2) return [{ station: exact2, score: 1 }];
+  // "el centro" → alias "centro": el alias también vale sin el artículo.
+  const alias2 = net.aliases.get(q);
+  if (alias2 && net.stations.has(alias2)) return [{ station: net.stations.get(alias2)!, score: 1 }];
   const qTokens = q.split(" ").filter(Boolean);
+  // Una consulta hecha solo de palabras genéricas ("el barrio", "la parada")
+  // no nombra ninguna estación: mejor ninguna candidata que una al azar.
+  if (!qTokens.some(meaningfulToken)) return [];
   const out: StationMatch[] = [];
   for (const s of net.stations.values()) {
     const key = normalizeName(s.name);
@@ -708,8 +731,8 @@ export function matchStations(net: MetroNetwork, text: string, limit = 5): Stati
       const shared = qTokens.filter((t) => kTokens.includes(t)).length;
       if (shared) {
         const jac = shared / new Set([...qTokens, ...kTokens]).size;
-        // Compartir solo un artículo o "san" no identifica una estación.
-        const meaningful = qTokens.filter((t) => kTokens.includes(t) && t.length > 3).length;
+        // Compartir solo un artículo, "san" o "barrio" no identifica una estación.
+        const meaningful = qTokens.filter((t) => kTokens.includes(t) && meaningfulToken(t)).length;
         score = meaningful ? 0.5 + 0.3 * jac : 0;
       } else if (key.includes(q) && q.length >= 4) score = 0.6;
       else if (q.length >= 5 && key.replace(/\s/g, "").includes(q.replace(/\s/g, ""))) score = 0.55;

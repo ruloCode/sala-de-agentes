@@ -285,6 +285,17 @@ describe("GTFS real del sistema", { skip: !hasReal && `no hay feed en ${REAL_DIR
     assert.equal(resolveStation(net, "san antonio")!.station.lines.length, 3, "San Antonio une A, B y tranvía");
   });
 
+  it("un barrio que no es estación NO resuelve a una estación parecida de nombre", () => {
+    // Antes "barrio Boston" caía en "Barrio Colombia" por compartir "barrio":
+    // un destino inventado. Ahora la palabra genérica no puntúa.
+    assert.equal(resolveStation(net, "barrio Boston"), null);
+    assert.deepEqual(matchStations(net, "el barrio"), [], "solo palabras genéricas → ninguna candidata");
+    assert.deepEqual(matchStations(net, "la parada"), []);
+    // …pero el nombre real de una parada con esa palabra sigue resolviendo.
+    assert.equal(resolveStation(net, "Barrio Colombia")!.station.key, "barrio colombia");
+    assert.equal(resolveStation(net, "Oriente")!.station.key, "oriente", "una estación con nombre de punto cardinal sigue exacta");
+  });
+
   it("estaciones de transbordo reales: Acevedo une A, K y P; San Antonio A, B y T-A", () => {
     const ace = net.stations.get("acevedo")!;
     assert.deepEqual(ace.lines.map((l) => net.lines.get(l)!.short).sort(), ["A", "K", "P"]);

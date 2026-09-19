@@ -1,0 +1,22 @@
+{
+  "_comment": "Copia a ~/.sala/barrios.json. Barrios o sectores con su centroide, para que 'cómo llego al barrio X' encuentre la estación más cercana y calcule la caminata. `source` es obligatorio (en la raíz o por entrada): de dónde salieron las coordenadas. Sin este archivo, los barrios no se reconocen y el tótem lo dice.",
+  "source": "Nombre del dataset oficial de límites de barrios de tu ciudad, portal y fecha de descarga",
+  "barrios": [
+    {
+      "name": "Boston",
+      "lat": 6.247727,
+      "lon": -75.558767
+    },
+    {
+      "name": "La Candelaria",
+      "lat": 6.249521,
+      "lon": -75.566532
+    },
+    {
+      "name": "Laureles",
+      "lat": 6.243263,
+      "lon": -75.595573,
+      "source": "otra fuente si esta entrada viene de otro lado"
+    }
+  ]
+}

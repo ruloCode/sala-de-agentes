@@ -27,12 +27,16 @@ import { eventsAt, EVENTS_PATH } from "./metro/events.js";
 const app = new Hono();
 
 // CORS: el tótem puede abrirse desde otro equipo de la red local (una pantalla
-// vertical no siempre es la misma máquina que sirve la web).
+// vertical no siempre es la misma máquina que sirve la web). Un dominio
+// público NUNCA entra por defecto: se declara en SALA_ALLOWED_ORIGINS, y aun
+// así lo normal en producción es que la web llame por su propio proxy y este
+// agente no vea un solo origin de internet.
 app.use(
   "*",
   cors({
     origin: (origin) => {
       if (!origin) return origin;
+      if (env.ALLOWED_ORIGINS.includes(origin.replace(/\/$/, ""))) return origin;
       const host = (() => {
         try {
           return new URL(origin).hostname;

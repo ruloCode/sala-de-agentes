@@ -22,9 +22,15 @@ interface Props {
   summary: string;
   station: string;
   lang: EstLanguage;
+  /**
+   * "fila": el QR a la izquierda y el texto al lado, debajo de la ruta (andén).
+   * "columna": el QR arriba y el texto debajo, para ir AL LADO de la ruta
+   * cuando la pantalla es apaisada y lo que sobra es ancho, no alto.
+   */
+  reparto?: "fila" | "columna";
 }
 
-export function HandoffQr({ plan, summary, station, lang }: Props) {
+export function HandoffQr({ plan, summary, station, lang, reparto = "fila" }: Props) {
   const [url, setUrl] = useState<string | null>(null);
 
   // Un pase por ruta: si el viajero pide otra, se emite otro.
@@ -45,8 +51,14 @@ export function HandoffQr({ plan, summary, station, lang }: Props) {
   // Sin host alcanzable no hay QR: un código que no abre nada es peor que nada.
   if (!svg || !url) return null;
 
+  const columna = reparto === "columna";
+
   return (
-    <aside className="flex items-center gap-5 rounded-[24px] bg-[var(--est-butter)] p-5 text-[var(--est-ink)]">
+    <aside
+      className={`flex gap-5 rounded-[24px] bg-[var(--est-butter)] p-5 text-[var(--est-ink)] ${
+        columna ? "flex-col items-start" : "items-center"
+      }`}
+    >
       <svg viewBox={svg.viewBox} className="h-[150px] w-[150px] shrink-0" role="img" aria-label={url}>
         <rect width="100%" height="100%" fill={EST.butter} />
         <path d={svg.path} fill={EST.ink} />

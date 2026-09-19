@@ -39,11 +39,30 @@ se prueba sin cámara, sin micrófono y sin red.
   (listado por ciudad en JSON y calendarios por su feed iCalendar, ambos anónimos).
   Es lo ÚNICO del tótem que sale a la red: se cachea en `~/.sala/cache/eventos.json`
   y, si la fuente se cae, se sirve lo último leído **marcado como tal**. Sin caché
-  y sin red, `ok:false` y la pantalla no pinta.
+  y sin red, `ok:false` y la pantalla no pinta. Los minutos a pie se calculan
+  contra las coordenadas de la estación en el GTFS con `walkMinutes` (puntos.ts).
 
+- **Destinos que no son estaciones** (`packages/shared/src/puntos.ts` puro +
+  `resolvePoint` en `apps/agent/src/metro/store.ts`): "barrio Boston" se
+  resuelve en cascada — dirección (número + vía) → geocodificador de Google
+  con `GOOGLE_MAPS_API_KEY`, único dato que sale de la máquina y rechazado si
+  cae fuera de la zona del sistema; estación; barrio exacto de
+  `~/.sala/barrios.json` (dataset oficial, con fuente) o lugar exacto de
+  `lugares.json`; parciales; candidatas si hay varios. `planBetweenPoints`
+  prueba las 3 estaciones más cercanas a cada punto y elige por (transbordos,
+  minutos totales CON caminata). El plan trae origen/destino reales, dónde
+  subirse y bajarse, tramos a pie y hora de llegada (`arrival`, `stale` si el
+  feed venció). Sin `barrios.json` no hay barrios y el tótem lo dice.
 - **Handoff** (`apps/agent/src/sala/handoff.ts`): pase de 15 min EN MEMORIA,
   sin identidad del viajero. El QR lo genera `packages/shared/src/qr.ts` (sin
   dependencias) y la URL sale del `lanIp` que publica `/machines`.
+- **Dos repartos del tótem** (`app/estacion/page.tsx`), no dos diseños: las
+  piezas (`cabecera`, `centro`, `controles`…) se declaran una vez y se colocan
+  según la forma de la ventana. **Vertical** = el andén: un lienzo fijo de
+  1080×1920 que se ESCALA entero para caber (en la pantalla real la escala es
+  1 y no cambia un píxel). **Apaisado** = escritorio: el contenido toma el
+  ancho y los anfitriones se van a un riel lateral; el QR se pone al lado de
+  la ruta en vez de debajo. Un 9:16 escalado en 16:9 dejaría el 68% en negro.
 - **Config del humano**: `~/.sala` (override `SALA_HOME`; si no existe pero sí
   `~/.hermes-os`, se usa esa). `pnpm setup:config` la prepara.
 
@@ -64,6 +83,13 @@ se prueba sin cámara, sin micrófono y sin red.
 - **Una columna de grid sin `min-w-0`** toma el ancho intrínseco de su
   contenido y empuja el resto fuera de pantalla. Se percibe como "el texto se
   sale". Pasó tres veces en el tótem.
+- **`justify-center` en un contenedor que hace scroll** recorta por ARRIBA y
+  deja ese borde INALCANZABLE: el scroll arranca ya pasado el título. Se
+  percibe como "el cuadro se ve cortado y no scrollea". El centrado va con
+  `my-auto` en un envoltorio (centra cuando cabe, no recorta cuando no).
+- **Un `truncate` que se traga la nota de "horario publicado"** deja la
+  pantalla prometiendo tiempo real. Lo que cede al recortar son los datos
+  repetibles; la advertencia sobre la fuente va en su propio `shrink-0`.
 - **La información de formato del QR va en (columna, fila)**; transpuesta, el
   código se ve perfecto y ningún lector lo acepta.
 - **El micrófono del navegador solo existe en contexto seguro.** Por
@@ -75,6 +101,11 @@ se prueba sin cámara, sin micrófono y sin red.
   chunk de TTS aparte): el reloj de reproducción se reinicia solo en turno
   nuevo, nunca por el cambio de modo.
 - **`cache: "no-store"` no existe** en el `RequestInit` de Node.
+- **Una palabra genérica compartida no identifica un lugar.** El emparejador
+  difuso contaba "barrio" (>3 letras) como significativa: "barrio Boston"
+  resolvía con confianza a *Barrio Colombia*, al otro lado del río. Un destino
+  inventado es peor que "no lo tengo". `GENERIC_PLACE_WORDS` no puntúa, y lo
+  EXACTO manda sobre lo parcial ("La Candelaria" es el barrio, no la basílica).
 - **La coordenada de un evento con dirección oculta viene CORRIDA a propósito.**
   Cuando la fuente marca `mode: "obfuscated"` (la dirección se la dan al que se
   inscribe), igual entrega un punto — pero desplazado. Unos minutos a pie
