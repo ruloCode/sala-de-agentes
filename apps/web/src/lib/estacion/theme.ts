@@ -67,6 +67,14 @@ export function clockText(now: Date, timeZone: string): string {
   return new Intl.DateTimeFormat("es-CO", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone }).format(now);
 }
 
+/**
+ * El día de HOY en la zona del sistema ("2026-09-19"). El tótem puede llevar
+ * días encendido: el "hoy" de las tarjetas no puede quedarse en el del arranque.
+ */
+export function todayIso(now: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone }).format(now);
+}
+
 export type EstLanguage = "es" | "en" | "pt";
 
 export const LANGUAGES: { code: EstLanguage; label: string }[] = [
@@ -84,6 +92,14 @@ export const COPY: Record<EstLanguage, Record<string, string>> = {
     connecting: "Conectando…",
     route: "Tu ruta",
     places: "Qué hacer cerca",
+    events: "Qué está pasando",
+    today: "Hoy",
+    tomorrow: "Mañana",
+    at: "en",
+    allDay: "todo el día",
+    venueUnknown: "la dirección la dan al inscribirte",
+    eventsNone: "Sin eventos publicados para estos días",
+    lastRead: "Último dato leído, puede haber cambiado",
     transfers: "transbordos",
     transfer: "transbordo",
     noTransfers: "sin transbordos",
@@ -106,6 +122,14 @@ export const COPY: Record<EstLanguage, Record<string, string>> = {
     connecting: "Connecting…",
     route: "Your route",
     places: "What's nearby",
+    events: "What's on",
+    today: "Today",
+    tomorrow: "Tomorrow",
+    at: "at",
+    allDay: "all day",
+    venueUnknown: "address shared once you register",
+    eventsNone: "No events published for these days",
+    lastRead: "Last data read, may have changed",
     transfers: "transfers",
     transfer: "transfer",
     noTransfers: "no transfers",
@@ -128,6 +152,14 @@ export const COPY: Record<EstLanguage, Record<string, string>> = {
     connecting: "Conectando…",
     route: "Sua rota",
     places: "O que fazer por perto",
+    events: "O que está rolando",
+    today: "Hoje",
+    tomorrow: "Amanhã",
+    at: "em",
+    allDay: "o dia todo",
+    venueUnknown: "o endereço é enviado ao se inscrever",
+    eventsNone: "Sem eventos publicados para estes dias",
+    lastRead: "Último dado lido, pode ter mudado",
     transfers: "baldeações",
     transfer: "baldeação",
     noTransfers: "sem baldeações",
@@ -147,4 +179,37 @@ export const COPY: Record<EstLanguage, Record<string, string>> = {
 
 export function t(lang: EstLanguage, key: string): string {
   return COPY[lang]?.[key] ?? COPY.es[key] ?? key;
+}
+
+const LOCALE: Record<EstLanguage, string> = { es: "es-CO", en: "en-US", pt: "pt-BR" };
+
+/**
+ * Cuándo es un evento, en palabras: "Hoy · 3:30 p. m.", "sáb 28 · 8:00 a. m.".
+ *
+ * `startsAt` ya viene en hora de la ciudad (el agente la movió), así que aquí
+ * se leen las partes tal cual: volver a construir un Date desde el string lo
+ * interpretaría en la zona del navegador y correría la hora. Un evento de todo
+ * el día NO recibe una hora: se dice que es todo el día.
+ */
+export function eventWhen(startsAt: string, allDay: boolean, lang: EstLanguage, todayIso: string): string {
+  const [date, time] = startsAt.split("T");
+  const [y, m, d] = date.split("-").map(Number);
+  const at = new Date(Date.UTC(y, m - 1, d));
+  const tomorrow = new Date(Date.parse(`${todayIso}T00:00:00Z`) + 86400000).toISOString().slice(0, 10);
+
+  const day =
+    date === todayIso
+      ? t(lang, "today")
+      : date === tomorrow
+        ? t(lang, "tomorrow")
+        : new Intl.DateTimeFormat(LOCALE[lang], { timeZone: "UTC", weekday: "short", day: "numeric" }).format(at);
+
+  if (allDay || !time) return `${day} · ${t(lang, "allDay")}`;
+  const [hh, mm] = time.split(":").map(Number);
+  const clock = new Intl.DateTimeFormat(LOCALE[lang], {
+    timeZone: "UTC",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(Date.UTC(y, m - 1, d, hh, mm)));
+  return `${day} · ${clock}`;
 }

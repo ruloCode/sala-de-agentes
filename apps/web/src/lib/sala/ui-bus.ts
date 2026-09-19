@@ -46,10 +46,26 @@ export interface UiPlace {
   category: string | null;
 }
 
+/** Un evento de la agenda. Lo que la fuente no publica viaja en null y se dice. */
+export interface UiCityEvent {
+  id: string;
+  name: string;
+  /** ISO local de la ciudad ("2026-09-28T15:30"). */
+  startsAt: string;
+  endsAt: string | null;
+  allDay: boolean;
+  venue: string | null;
+  neighborhood: string | null;
+  url: string;
+  source: string;
+  walkMinutes: number | null;
+}
+
 export type UiEvent =
   | { kind: "route"; plan: UiRoutePlan; notices: UiNotice[]; next: { line: string; headsign: string; inMinutes: number[] }[]; scheduleStale: boolean }
   | { kind: "route_failed"; query: string; error: string; suggestions: string[] }
   | { kind: "places"; station: string; places: UiPlace[] }
+  | { kind: "events"; station: string; events: UiCityEvent[]; stale: boolean }
   | { kind: "status"; notices: UiNotice[] }
   | { kind: "language"; language: string }
   | { kind: "clear" };

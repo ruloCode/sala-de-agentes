@@ -8,6 +8,7 @@ import { env } from "./env.js";
 import { listSalaAgents, portraitPath, resolveSalaAgentId, salaCast, salaStation, salaTopic, SALA_PATH } from "./sala/store.js";
 import { createHandoff, readHandoff, HANDOFF_TTL_MS } from "./sala/handoff.js";
 import { departuresAt, placesAt, readStatus, routeBetween, stationList, METRO_STATUS_PATH, PLACES_PATH } from "./metro/store.js";
+import { eventsAt, EVENTS_PATH } from "./metro/events.js";
 
 /**
  * Agente de la Sala de Agentes y del Tótem de estación.
@@ -226,6 +227,21 @@ app.get("/metro/places", async (c) => {
     return c.json(await placesAt(station));
   } catch (err) {
     return c.json({ ok: false, error: err instanceof Error ? err.message : String(err), path: PLACES_PATH });
+  }
+});
+
+// Qué PASA cerca (agenda con fecha), no qué HAY (lugares con horario). Es la
+// única ruta del tótem que sale a la red; si ninguna fuente responde y no hay
+// nada cacheado, lo dice en vez de devolver una lista vacía que parecería
+// "no hay nada esta semana".
+app.get("/metro/events", async (c) => {
+  if (!env.ESTACION_ENABLED) return c.json(estacionOff(), 404);
+  const station = (c.req.query("station") ?? "").trim();
+  if (!station) return c.json({ ok: false, error: "falta station" }, 400);
+  try {
+    return c.json(await eventsAt(station, c.req.query("when")));
+  } catch (err) {
+    return c.json({ ok: false, error: err instanceof Error ? err.message : String(err), path: EVENTS_PATH });
   }
 });
 

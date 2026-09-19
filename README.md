@@ -64,6 +64,7 @@ que encuentre.
 | `gtfs/metro/*.txt` | El feed del sistema de transporte. Sin él no hay rutas. | — |
 | `metro.json` | Alias como los dice la gente, nombres con tilde, minutos de transbordo. | `docs/metro.example.json` |
 | `lugares.json` | Qué hay cerca de cada estación, con minutos a pie, horario y **fuente**. | `docs/lugares.example.json` |
+| `eventos.json` | De dónde sale la **agenda** de la ciudad (qué pasa, con fecha). Sin fuentes, el tótem lo dice. | `docs/eventos.example.json` |
 | `metro-status.json` | Novedades del servicio de hoy. Sin archivo, no hay banner. | `docs/metro-status.example.json` |
 
 Un lugar sin horario publicado se muestra como "sin horario publicado". El
@@ -108,6 +109,7 @@ que la voz pueda relatar el problema en vez de tropezar con un 500.
 | `POST /metro/route {from?, to}` | La ruta con tramos, colores del feed, paradas y minutos. Sin `from`, sale de la estación del tótem. Si no reconoce un nombre, devuelve candidatas en vez de adivinar. |
 | `GET /metro/stations` · `GET /metro/next?station=` | La red y las próximas salidas. |
 | `GET /metro/status` · `GET /metro/places?station=` | Novedades y lugares (vacío si no hay archivo). |
+| `GET /metro/events?station=&when=` | Agenda de la ciudad cerca de una estación, de fuentes públicas (`eventos.json`). Única ruta que sale a la red; cachea en `~/.sala/cache/`. |
 
 `SALA_ENABLED=off` y `ESTACION_ENABLED=off` apagan cada mitad.
 

@@ -4,9 +4,28 @@
 // versión mínima que un personaje de la sala necesita para no inventar.
 
 import { hermesGet, hermesPost } from "@/lib/hermes";
-import { emitUiEvent, type UiNotice, type UiPlace, type UiRoutePlan } from "./ui-bus";
+import { emitUiEvent, type UiCityEvent, type UiNotice, type UiPlace, type UiRoutePlan } from "./ui-bus";
 
 const str = (v: unknown): string | undefined => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+
+/** Cuándo es un evento, dicho en voz alta. Todo el día NO recibe una hora inventada. */
+function sayWhen(e: { startsAt: string; allDay: boolean }): string {
+  const [date, time] = e.startsAt.split("T");
+  const dia = new Date(`${date}T12:00:00Z`).toLocaleDateString("es-CO", {
+    timeZone: "UTC",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+  if (e.allDay || !time) return `el ${dia}, todo el día`;
+  const [hh, mm] = time.split(":");
+  const hora = new Date(Date.UTC(2000, 0, 1, Number(hh), Number(mm))).toLocaleTimeString("es-CO", {
+    timeZone: "UTC",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  return `el ${dia} a las ${hora}`;
+}
 
 interface RouteAnswer {
   ok: boolean;
@@ -85,6 +104,54 @@ export function estacionClientTools(): Record<string, (p: Record<string, unknown
           .join(". ");
       } catch {
         return "No alcanzo la lista de lugares ahora mismo.";
+      }
+    },
+    events_near: async (p) => {
+      const station = str(p.station) ?? str(p.estacion) ?? "";
+      if (!station) return "¿Cerca de qué estación?";
+      const when = str(p.when) ?? str(p.cuando);
+      try {
+        const q = new URLSearchParams({ station });
+        if (when) q.set("when", when);
+        const r = await hermesGet<{
+          ok: boolean;
+          station?: string;
+          resolved?: boolean;
+          events?: UiCityEvent[];
+          stale?: boolean;
+          configured?: boolean;
+          horizonDays?: number;
+          error?: string;
+        }>(`/metro/events?${q}`);
+        if (!r.ok) return r.error ?? "No pude leer la agenda.";
+        // Sin estación reconocida no hay "cerca": se repregunta en vez de
+        // contestar con la agenda de toda la ciudad, que se leería como si
+        // todo quedara al lado.
+        if (r.resolved === false) return `No reconozco la estación ${r.station ?? station}. ¿Cuál es?`;
+        const events = r.events ?? [];
+        const stale = Boolean(r.stale);
+        emitUiEvent({ kind: "events", station: r.station ?? station, events, stale });
+        if (!events.length) {
+          if (!r.configured) return "Todavía no tengo fuentes de agenda cargadas.";
+          return `No tengo nada publicado para los próximos ${r.horizonDays ?? 14} días cerca de ${r.station ?? station}.`;
+        }
+        // La sede que no se publicó NO se rellena: se dice el barrio, o nada.
+        const dicho = events
+          .slice(0, 3)
+          .map((e) => {
+            const donde = e.venue
+              ? `, en ${e.venue}`
+              : e.neighborhood
+                ? `, por ${e.neighborhood}, y la dirección la dan al inscribirse`
+                : "";
+            const pie = e.walkMinutes === null ? "" : `, a ${e.walkMinutes} minutos a pie`;
+            return `${e.name}, ${sayWhen(e)}${donde}${pie}`;
+          })
+          .join(". ");
+        // Una agenda vieja se relata como vieja: es dato, no predicción.
+        return stale ? `Esto es lo último que alcancé a leer: ${dicho}.` : `${dicho}.`;
+      } catch {
+        return "No alcanzo la agenda de la ciudad ahora mismo.";
       }
     },
     metro_next: async (p) => {

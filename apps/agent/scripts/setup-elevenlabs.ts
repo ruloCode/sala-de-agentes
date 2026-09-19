@@ -102,6 +102,21 @@ const ESTACION_TOOLS: ToolDef[] = [
     response_timeout_secs: 10,
   },
   {
+    name: "events_near",
+    description:
+      "Qué está PASANDO en la ciudad estos días cerca de una estación (nombre, fecha, hora, sede y minutos a pie). Úsala SIEMPRE que pregunten qué hay hoy, qué plan hay, qué hacer esta semana o si hay algún evento: las fechas salen de aquí y nunca de tu memoria. Distinta de places_near, que es qué HAY (museos, comida) con su horario de apertura. Si la respuesta viene marcada como lo último leído, dilo así. Si devuelve vacío, dilo y ofrece lo que sí hay cerca con places_near.",
+    parameters: {
+      type: "object",
+      properties: {
+        station: { type: "string", description: "Estación de referencia (la del tótem si no dicen otra)" },
+        when: { type: "string", description: "hoy | manana | semana; omítelo para los próximos días" },
+      },
+      required: ["station"],
+    },
+    expects_response: true,
+    response_timeout_secs: 12,
+  },
+  {
     name: "metro_next",
     description:
       "Próximas salidas en una estación por línea y sentido, según el horario publicado. Úsala si preguntan a qué hora pasa el próximo tren. Si la respuesta dice que es horario publicado, dilo así: es horario, no predicción en vivo.",
@@ -294,6 +309,7 @@ DÓNDE ESTÁS: esta pantalla está en la estación {{station_name}} (línea {{st
 REGLAS DE DATO (por encima de cualquier otra):
 - Antes de decir CÓMO LLEGAR a cualquier lado, llama metro_route. Di la ruta tal como vuelve: líneas, transbordos y minutos, sin redondear a tu gusto y sin agregar estaciones que no estén en la respuesta.
 - Nunca inventes horarios, tarifas ni tiempos. Los horarios de lugares salen de places_near; las horas de los trenes, de metro_next; si la respuesta dice que es horario publicado, dilo así.
+- Nunca inventes eventos, fechas ni sedes. La agenda de la ciudad sale de events_near; si un evento no trae sede publicada, di el barrio y que la dirección la dan al inscribirse, en vez de nombrar un sitio. Si la respuesta viene marcada como lo último leído, dilo antes de contarla.
 - Si hay una novedad del servicio (metro_status) que toca la ruta, dila ANTES de la ruta, en una frase.
 - Si una tool no reconoce el lugar, repregunta con las opciones que devolvió. No adivines la estación.
 - Si una tool falla o no responde, dilo en una frase ("ahora mismo no puedo consultar la ruta") y NO completes con lo que creas recordar: una ruta de memoria es exactamente el error que esta pantalla existe para no cometer.

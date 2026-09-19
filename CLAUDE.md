@@ -34,6 +34,13 @@ se prueba sin cámara, sin micrófono y sin red.
   (estación, línea) con costo lexicográfico: **primero menos transbordos,
   luego menos minutos**. Cuando el calendario del feed venció, las salidas se
   marcan `stale` y la UI dice "horario publicado".
+- **Eventos** (`packages/shared/src/eventos.ts` puro + `apps/agent/src/metro/events.ts`):
+  la agenda de ciudad sale de fuentes públicas declaradas en `~/.sala/eventos.json`
+  (listado por ciudad en JSON y calendarios por su feed iCalendar, ambos anónimos).
+  Es lo ÚNICO del tótem que sale a la red: se cachea en `~/.sala/cache/eventos.json`
+  y, si la fuente se cae, se sirve lo último leído **marcado como tal**. Sin caché
+  y sin red, `ok:false` y la pantalla no pinta.
+
 - **Handoff** (`apps/agent/src/sala/handoff.ts`): pase de 15 min EN MEMORIA,
   sin identidad del viajero. El QR lo genera `packages/shared/src/qr.ts` (sin
   dependencias) y la URL sale del `lanIp` que publica `/machines`.
@@ -68,6 +75,13 @@ se prueba sin cámara, sin micrófono y sin red.
   chunk de TTS aparte): el reloj de reproducción se reinicia solo en turno
   nuevo, nunca por el cambio de modo.
 - **`cache: "no-store"` no existe** en el `RequestInit` de Node.
+- **La coordenada de un evento con dirección oculta viene CORRIDA a propósito.**
+  Cuando la fuente marca `mode: "obfuscated"` (la dirección se la dan al que se
+  inscribe), igual entrega un punto — pero desplazado. Unos minutos a pie
+  calculados con él se ven perfectos y son mentira. Se descarta la coordenada y
+  se muestra el barrio. Es el mismo error de familia que el QR transpuesto.
+- **"Hoy" son CERO días más, no uno.** Un horizonte de un día sumado a hoy
+  incluye mañana: "¿qué hay hoy?" contestaba con el plan del día siguiente.
 
 ## QA sin hardware
 

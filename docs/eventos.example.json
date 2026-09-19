@@ -1,0 +1,22 @@
+{
+  "_comment": "Copia a ~/.sala/eventos.json (override SALA_EVENTS_PATH). De dónde sale la AGENDA de la ciudad: qué pasa, con fecha. Distinto de lugares.json, que dice qué hay y a qué hora abre. `sources` arranca VACÍO a propósito: sin fuentes el tótem dice que no tiene agenda cargada, que es preferible a una pantalla que promete planes que no existen. Copia una entrada de `_ejemplo` a `sources` cuando tengas el id real. La respuesta se cachea `cache_minutes` en ~/.sala/cache/eventos.json para no golpear la fuente en cada turno de voz; si la fuente se cae, se sigue mostrando lo último leído DICIENDO que es lo último leído.",
+  "_ejemplo": [
+    {
+      "kind": "luma_place",
+      "id": "discplace-XXXXXXXXXXXXXXX",
+      "label": "Agenda de la ciudad",
+      "_como": "El listado público de una ciudad. El id sale del HTML de la página de esa ciudad en la plataforma: busca \"discplace-\" dentro del bloque __NEXT_DATA__."
+    },
+    {
+      "kind": "luma_calendar",
+      "id": "cal-XXXXXXXXXXXXXXX",
+      "label": "Nombre del calendario",
+      "_como": "Un calendario público concreto, leído por su feed iCalendar. El id sale del botón 'Add iCal Subscription' de ese calendario (la URL termina en id=cal-...)."
+    }
+  ],
+  "timezone": null,
+  "cache_minutes": 60,
+  "horizon_days": 14,
+  "walk_max_minutes": 25,
+  "sources": []
+}
